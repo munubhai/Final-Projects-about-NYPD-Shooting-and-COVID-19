@@ -1,0 +1,95 @@
+---
+title: "NYPD Shooting"
+author: "Prakash Lingden"
+date: "2025-07-18"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=TRUE}
+library(tidyverse)
+library(DT)
+library(lubridate)
+
+
+url_in <- "https://data.cityofnewyork.us/api/views/833y-fsy8/rows.csv?accessType=DOWNLOAD"
+nypd_data <- read_csv(url(url_in))
+
+# Print number of rows and columns
+cat("Dataset has", nrow(nypd_data), "rows and", ncol(nypd_data), "columns.\n")
+
+# Display full dataset as interactive table (searchable, sortable, paginated)
+datatable(nypd_data, options = list(pageLength = 25))
+
+# Show first 10 rows
+head(nypd_data, 10)
+
+# Summary of the dataset
+summary(nypd_data)
+
+
+
+# Convert OCCUR_DATE to Date format
+nypd_data <- nypd_data %>%
+  mutate(OCCUR_DATE = as.Date(OCCUR_DATE, format = "%m/%d/%Y"))
+
+# Extract year, month, weekday
+nypd_data <- nypd_data %>%
+  mutate(
+    year = year(OCCUR_DATE),
+    month = month(OCCUR_DATE, label = TRUE),
+    weekday = wday(OCCUR_DATE, label = TRUE)
+  )
+
+
+
+nypd_data %>%
+  group_by(year) %>%
+  summarize(total_incidents = n()) %>%
+  ggplot(aes(x = year, y = total_incidents)) +
+  geom_col(fill = "darkred") +
+  labs(title = "Total NYPD Shooting Incidents Per Year",
+       x = "Year", y = "Number of Incidents") +
+  theme_minimal()
+
+
+nypd_data %>%
+  filter(!is.na(BORO)) %>%
+  group_by(BORO, weekday) %>%
+  summarize(incidents = n()) %>%
+  ggplot(aes(x = weekday, y = incidents, fill = BORO)) +
+  geom_col(position = "dodge") +
+  labs(title = "NYPD Shootings by Weekday and Borough",
+       x = "Day of Week", y = "Number of Incidents") +
+  theme_minimal()
+
+
+
+nypd_data %>%
+  filter(!is.na(VIC_AGE_GROUP)) %>%
+  count(VIC_AGE_GROUP, sort = TRUE) %>%
+  ggplot(aes(x = reorder(VIC_AGE_GROUP, n), y = n)) +
+  geom_col(fill = "steelblue") +
+  labs(title = "Victim Age Distribution in NYPD Shootings",
+       x = "Victim Age Group", y = "Number of Incidents") +
+  coord_flip() +
+  theme_minimal()
+
+```
+
+# Conclusion
+The analysis of NYPD shooting incidents reveals several important trends:
+
+* Increasing Trend Over Time: There is a noticeable increase in the total number of shooting incidents over the years, with a sharper rise after 2020, which may be associated with societal impacts during and after the COVID-19 pandemic.
+
+* Variation by Day of the Week and Borough: Shootings are more frequent during weekends, particularly on Fridays and Saturdays. The distribution also varies by borough, with some boroughs experiencing consistently higher incident counts on certain days.
+
+* Victim Age Groups: The majority of shooting victims fall within the age range of 25 to 44 years, indicating that adults in this age bracket are the most affected group.
+
+* The dataset may underrepresent the true number of shootings due to unreported incidents and missing information in some records. Additionally, changes in reporting practices over time and lack of contextual details limit the full understanding of shooting patterns in NYC.
+
+
+
+
+
