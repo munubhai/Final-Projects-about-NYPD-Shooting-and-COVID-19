@@ -247,3 +247,7 @@ US_tot_w_pred %>% ggplot() +
   geom_point(aes(x= cases_per_thou, y = pred), color = "red" )
 
 ```
+
+#Conclusion
+
+The report includes a conclusion that summarizes the main findings about COVID-19 cases and deaths across different states. However, it does not explicitly identify possible sources of bias in the data or analysis. Potential biases, such as differences in testing rates, reporting delays, missing values in the data, or unreported cases were not discussed but could affect the results.
