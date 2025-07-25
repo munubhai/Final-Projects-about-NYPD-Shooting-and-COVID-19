@@ -187,6 +187,22 @@ US_by_State %>%
         axis.text.x = element_text(angle = 90)) +
   labs(title = paste("COVID-19 in", state), y = NULL)
 
+states <- c("New York", "California", "Michigan", "Florida", "Illinois")
+US_by_State %>%
+  filter(Province_State %in% states, cases > 0) %>%
+  select(date, Province_State, new_cases, new_deaths = deaths) %>%
+  pivot_longer(cols = c(new_cases, new_deaths), 
+               names_to = "type", 
+               values_to = "count") %>%
+  ggplot(aes(x = date, y = count, fill = type)) +
+  geom_col(position = "dodge") +
+  facet_wrap(~ Province_State, scales = "free_y") +
+  scale_y_log10() +
+  theme_minimal() +
+  theme(legend.position = "bottom", 
+        axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(title = "COVID-19: New Cases and Deaths in 5 States", 
+       x = "Date", y = "Count (log scale)", fill = "Metric")
     
 US_state_totals <- US_by_State%>%
   group_by(Province_State)%>%
